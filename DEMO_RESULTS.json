@@ -1,0 +1,71 @@
+{
+  "date": "2026-10-08",
+  "kind": "Local smoke checks, not a LangSmith experiment",
+  "model": "qwen3.6:latest",
+  "installed_model_id": "07d35212591f",
+  "analysis_reasoning": false,
+  "incident": "Checkout requests became slow immediately after a deployment.",
+  "note": "All local runs used the existing CLI incident text; these are not executions of the hosted dataset inputs. Explanations are actual model output and may contain unsupported causal claims. Clear-db output transcribed from the successful CLI run.",
+  "results": [
+    {
+      "scenario": "healthy",
+      "seconds": 6.6,
+      "output": {
+        "leading_candidate": null,
+        "operational_bottleneck": null,
+        "culprit": null,
+        "abstained": true,
+        "reasoning": "The normalized operational evidence indicates that all three candidate services (checkout-api, payments-db, and redis) are performing better than their respective baselines. Specifically, p95 and p99 latencies for checkout-api decreased by approximately 3-2%, query latency for payments-db decreased by 5%, and p95 latency for redis decreased by 10%. Error rates remained unchanged. Since there is no observed service degradation, resource saturation, or performance bottleneck in any of the candidates, there is no evidence to support a specific leading candidate or identify an operational bottleneck. The reported slowness may be due to factors not captured by these specific metric snapshots (e.g., client-side issues, network latency, or transient spikes not reflected in current averages)."
+      },
+      "scores": [
+        {
+          "key": "culprit_correct",
+          "score": true
+        },
+        {
+          "key": "abstention_correct",
+          "score": true
+        },
+        {
+          "key": "execution_success",
+          "score": true
+        }
+      ]
+    },
+    {
+      "scenario": "clear_db",
+      "output": {
+        "leading_candidate": "payments-db",
+        "operational_bottleneck": "payments-db",
+        "culprit": "payments-db",
+        "abstained": false,
+        "reasoning": "The `payments-db` exhibits severe resource saturation and performance degradation, with CPU utilization at 95% (near saturation) and query latency increased by 4900% (from 40ms to 2000ms). This extreme latency directly correlates with the `checkout-api`'s degraded p95 latency (1300ms vs baseline 150ms) and elevated error rate (5%). In contrast, `redis` metrics are stable and within baseline, ruling it out as a bottleneck. While `checkout-api` is affected, its CPU usage (35%) is not saturated, suggesting it is waiting on downstream dependencies rather than being the primary source of resource contention. The saturation of `payments-db` is the immediate constraint causing the system-wide slowdown."
+      }
+    },
+    {
+      "scenario": "ambiguous",
+      "seconds": 6.1,
+      "output": {
+        "leading_candidate": "payments-db",
+        "operational_bottleneck": "payments-db",
+        "culprit": "payments-db",
+        "abstained": false,
+        "reasoning": "The `checkout-api` exhibits significantly degraded performance (p95 latency increased by 700% and error rate by 3900%). However, the root cause lies in its dependency. The `payments-db` shows a massive increase in query latency (2650% deviation from baseline) and high CPU utilization (72%), indicating resource saturation or performance degradation at the database layer. Redis metrics are normal, ruling it out as the bottleneck. Since `checkout-api` latency is likely waiting on `payments-db` queries, `payments-db` is both the leading candidate for investigation and the identified operational bottleneck constraining the system."
+      },
+      "scores": [
+        {
+          "key": "culprit_correct",
+          "score": false
+        },
+        {
+          "key": "abstention_correct",
+          "score": false
+        },
+        {
+          "key": "execution_success",
+          "score": true
+        }
+      ]
+    }
+  ]
+}

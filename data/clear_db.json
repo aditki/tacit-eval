@@ -1,0 +1,24 @@
+
+{
+  "checkout-api": {
+    "cpu": {"utilization": "35%"},
+    "memory": {"usage": "45%"},
+    "p95_latency": "1300ms",
+    "p99_latency": "1800ms",
+    "baseline_p95_latency": "150ms",
+    "error_rate": "5%",
+    "baseline_error_rate": "0.1%"
+  },
+  "payments-db": {
+    "active_connections": 98,
+    "max_connections": 100,
+    "query_latency": "2000ms",
+    "baseline_query_latency": "40ms",
+    "cpu": {"utilization": "95%"}
+  },
+  "redis": {
+    "memory": {"usage": "40%"},
+    "p95_latency": "10ms",
+    "baseline_p95_latency": "10ms"
+  }
+}
